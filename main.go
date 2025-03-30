@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
+	uniPdfLicense "github.com/unidoc/unipdf/v3/common/license"
 	"go_ocr/src/services/ai"
 	"go_ocr/src/services/logger"
 	"go_ocr/src/services/pdf_extractor"
@@ -21,6 +22,12 @@ func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("No se encontró archivo .env")
+	}
+
+	licenseKey := os.Getenv("UNIPDF_LICENSE_KEY")
+	err = uniPdfLicense.SetMeteredKey(licenseKey)
+	if err != nil {
+		log.Fatal("Error al configurar licencia de UniPDF: %v", err)
 	}
 
 	// Configurar logger

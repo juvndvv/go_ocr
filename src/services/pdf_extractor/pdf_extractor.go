@@ -2,7 +2,6 @@ package pdf_extractor
 
 import (
 	"fmt"
-	"github.com/unidoc/unipdf/v3/common/license"
 	"github.com/unidoc/unipdf/v3/extractor"
 	"github.com/unidoc/unipdf/v3/model"
 	"go_ocr/src/services/logger"
@@ -51,13 +50,6 @@ func ExtractTextFromPDF(path string) (string, error) {
 
 func extractWithUniPDF(path string) (string, error) {
 	log.Debug("Abriendo PDF con UniPDF: %s", path)
-
-	licenseKey := os.Getenv("UNIPDF_LICENSE_KEY")
-	err := license.SetMeteredKey(licenseKey)
-	if err != nil {
-		log.Error("Error al configurar licencia de UniPDF: %v", err)
-		return "", fmt.Errorf("error al configurar licencia de UniPDF: %v", err)
-	}
 
 	// Abrir el archivo PDF
 	f, err := os.Open(path)
