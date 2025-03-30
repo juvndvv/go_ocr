@@ -1,0 +1,33 @@
+Extract and transform payroll data into a JSON structure following these exact requirements:
+
+1. JSON Structure (Mantain fields order and nesting):
+   {
+     "employee": {
+       "name": "(nombre completo)",
+       "identification": "(validar formato)"
+     },
+     "date_range": {
+       "start_date": "yyyy-mm-dd",
+       "end_date": "yyyy-mm-dd"
+     },
+     "employer_costs": (valor numérico),
+     "gross_amount": (valor numérico),
+     "deductions": (valor numérico),
+     "net_amount": (valor numérico)
+   }
+
+2. Reglas estrictas:
+   - Employee Identification Validation: Si el ID fiscal comienza con A,B,C,D, debes buscar una cadena en el texto que cumpla con los requisitos de ser un DNI o un NIE (DNI: 8 numeros + 1 letra, NIE: X|Y|Z + 7 numeros + 1 letra), si no la encuentras devuelve null
+   - Employer Costs: Debe ser (gross_amount + deductions + company's contributions) si no se encuentra
+   - Fechas: Formato ISO 8601 (ej: 2023-10-01)
+   - Valores numéricos: Usar .0 decimal incluso para enteros
+   - Campos faltantes: Usar null
+
+3. Validaciones finales:
+   - identification DEBE ser un DNI o NIE válido
+   - employer_costs DEBE ser el valor más alto
+   - net_amount DEBE ser (gross_amount - deductions)
+   - Eliminar cualquier campo no especificado
+   - Nunca agregar comentarios/explicaciones
+
+Procesar el texto proporcionado aplicando estas reglas estrictamente.
