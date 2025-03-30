@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go_ocr/services/logger"
+	"go_ocr/src/services/logger"
 	"io"
 	"net/http"
 	"os"
@@ -21,6 +21,10 @@ type PayrollData struct {
 		Name  string `json:"name"`
 		TaxID string `json:"tax_id"`
 	} `json:"employee"`
+	DateRange struct {
+		StartDate string `json:"start_date"`
+		EndDate   string `json:"end_date"`
+	}
 	EmployerCosts float64 `json:"employer_costs"`
 	GrossAmount   float64 `json:"gross_amount"`
 	Deductions    float64 `json:"deductions"`

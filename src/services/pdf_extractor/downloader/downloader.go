@@ -2,7 +2,7 @@ package downloader
 
 import (
 	"fmt"
-	"go_ocr/services/logger"
+	"go_ocr/src/services/logger"
 	"io"
 	"net/http"
 	"os"
