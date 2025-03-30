@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -36,27 +37,44 @@ func ExtractPayrollData(text string) (*PayrollData, error) {
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 
 	// Construir el prompt completo
-	prompt := `Extract the following payroll data from the provided text and return ONLY a JSON with these exact fields (use empty strings or null for missing data). The employee.tax_id field must not start with A, B, C or D. Do not include any other fields or comments:
-	{
-	  "employee": {
-		"name": "",
-		"tax_id": ""
-	  },
-      "date_range": {
-		"start_date": "yyyy-mm-dd",
-		"end_date": "yyyy-mm-dd"
-	  },
-	  "employer_costs": 0.0,
-	  "gross_amount": 0.0,
-	  "deductions": 0.0,
-	  "net_amount": 0.0
-	}` + "\n\n" + text
+	prompt := `Extract and transform payroll data into a JSON structure following these exact requirements:
+
+		1. JSON Structure (Mantain fields order and nesting):
+		   {
+			 "employee": {
+			   "name": "(nombre completo)",
+			   "tax_id": "(validar formato)"
+			 },
+			 "date_range": {
+			   "start_date": "yyyy-mm-dd",
+			   "end_date": "yyyy-mm-dd"
+			 },
+			 "employer_costs": (valor numérico),
+			 "gross_amount": (valor numérico),
+			 "deductions": (valor numérico),
+			 "net_amount": (valor numérico)
+		   }
+		
+		2. Reglas estrictas:
+		   - Tax ID Validation: Si el ID fiscal comienza con A,B,C,D, busca una cadena que se refiera a un DNI o NIE, si no la encuentras devuelve null
+		   - Employer Costs: Debe ser (gross_amount + deductions + company's contributions) si no se encuentra
+		   - Fechas: Formato ISO 8601 (ej: 2023-10-01)
+		   - Valores numéricos: Usar .0 decimal incluso para enteros
+		   - Campos faltantes: Usar null
+		
+		3. Validaciones finales:
+		   - employer_costs DEBE ser el valor más alto
+		   - net_amount DEBE ser (gross_amount - deductions)
+		   - Eliminar cualquier campo no especificado
+		   - Nunca agregar comentarios/explicaciones
+		
+		Procesar el texto proporcionado aplicando estas reglas estrictamente.` + "\n\n" + text
 
 	log.Info("Prompt: %s", prompt)
 
 	// Estructura para la solicitud a la API
 	requestBody := map[string]interface{}{
-		"model": "deepseek-chat",
+		"model": "deepseek-reasoner",
 		"messages": []map[string]string{
 			{
 				"role":    "system",
@@ -118,7 +136,7 @@ func ExtractPayrollData(text string) (*PayrollData, error) {
 		return nil, fmt.Errorf("error unmarshaling API response: %v", err)
 	}
 
-	log.Info("API response: %+v", apiResponse)
+	log.Info("API response: %+v", apiResponse.Choices[0].Message.Content)
 
 	if len(apiResponse.Choices) == 0 {
 		return nil, fmt.Errorf("no choices in API response")
@@ -132,6 +150,23 @@ func ExtractPayrollData(text string) (*PayrollData, error) {
 	var payrollData PayrollData
 	if err := json.Unmarshal([]byte(jsonContent), &payrollData); err != nil {
 		return nil, fmt.Errorf("error unmarshaling payroll data: %v", err)
+	}
+
+	// Define la expresión regular para DNI (8 dígitos + letra) y NIE (X/Y/Z + 7 dígitos + letra)
+	taxIDRegex := `(?i)^(\d{8}[a-z]|[xyz]\d{7}[a-z])$`
+	matched, err := regexp.MatchString(taxIDRegex, payrollData.Employee.TaxID)
+	if err != nil {
+		panic(err) // Maneja errores en la ejecución de la regex
+	}
+
+	if !matched {
+		// Busca en la variable text cualquier coincidencia de DNI/NIE
+		re := regexp.MustCompile(`(?i)(\d{8}[a-z]|[xyz]\d{7}[a-z])`)
+		found := re.FindString(text)
+		if found != "" {
+			// Actualiza el TaxID con el valor encontrado (opcional: convertir a mayúsculas)
+			payrollData.Employee.TaxID = strings.ToUpper(found)
+		}
 	}
 
 	return &payrollData, nil
