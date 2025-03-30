@@ -1,7 +1,13 @@
-.PHONY: build watch run dev
+.PHONY: build watch run dev install stop clean
 
 APP_NAME := build/ocr-api
 PID_FILE := build/pid.txt
+
+install:
+	@echo "Instalando dependencias..."
+	@go mod tidy
+	@echo "Dependencias instaladas."
+	@cp .env.example .env
 
 build:
 	@echo "Compilando aplicación..."
