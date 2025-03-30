@@ -24,7 +24,7 @@ type PayrollData struct {
 	DateRange struct {
 		StartDate string `json:"start_date"`
 		EndDate   string `json:"end_date"`
-	}
+	} `json:"date_range"`
 	EmployerCosts float64 `json:"employer_costs"`
 	GrossAmount   float64 `json:"gross_amount"`
 	Deductions    float64 `json:"deductions"`
