@@ -4,14 +4,16 @@ go 1.23.0
 
 toolchain go1.23.7
 
-require github.com/unidoc/unipdf/v3 v3.68.0
+require (
+	github.com/joho/godotenv v1.5.1
+	github.com/unidoc/unipdf/v3 v3.68.0
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/hhrutter/lzw v1.0.0 // indirect
 	github.com/hhrutter/tiff v1.0.1 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/pdfcpu/pdfcpu v0.9.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -23,10 +25,10 @@ require (
 	github.com/unidoc/pkcs7 v0.2.0 // indirect
 	github.com/unidoc/timestamp v0.0.0-20200412005513-91597fd3793a // indirect
 	github.com/unidoc/unitype v0.5.1 // indirect
-	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/image v0.24.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/image v0.25.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
