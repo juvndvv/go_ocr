@@ -7,6 +7,7 @@ import (
 	"go_ocr/src/services/logger"
 	"go_ocr/src/services/pdf_extractor/ocr"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 )
@@ -20,8 +21,18 @@ func ExtractTextFromPDF(path string) (string, error) {
 	log.Info("Iniciando extracción de texto de PDF: %s", path)
 	log.Debug("Parámetros de ExtractTextFromPDF - path: %s", path)
 
-	// Intentar extracción con UniPDF primero
-	text, err := extractWithUniPDF(path)
+	text, err := extractWithPdfToText(path)
+	if err != nil {
+		log.Warning("Extracción con pdftotext fallida: %v", err)
+	} else {
+		log.Info("Extracción con pdftotext exitosa. Longitud del texto: %d", len(text))
+		log.Debug("Texto extraído (primeros 100 caracteres): %.100q", text)
+		log.Info("Proceso completado. Tiempo total: %v", time.Since(startTime))
+		return text, nil
+	}
+
+	// Intentar extracción con UniPDF
+	text, err = extractWithUniPDF(path)
 	if err != nil {
 		log.Warning("Extracción con UniPDF fallida: %v", err)
 	} else if len(text) > 50 {
@@ -46,6 +57,23 @@ func ExtractTextFromPDF(path string) (string, error) {
 	log.Info("Proceso completado. Tiempo total: %v", time.Since(startTime))
 
 	return ocrText, nil
+}
+
+func extractWithPdfToText(path string) (string, error) {
+	log.Debug("Extrayendo texto de PDF con pdftotext: %s", path)
+
+	// Ejecutar pdftotext
+	cmd := exec.Command("pdftotext", path, "-")
+	log.Debug("Ejecutando comando: %v", cmd.Args)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Error("Error al extraer texto con pdftotext: %v\nSalida: %s", err, string(output))
+		return "", fmt.Errorf("error al extraer texto: %v\nSalida: %s", err, string(output))
+	}
+
+	log.Debug("Extracción con pdftotext completada. Longitud del texto: %d", len(output))
+	return string(output), nil
 }
 
 func extractWithUniPDF(path string) (string, error) {
