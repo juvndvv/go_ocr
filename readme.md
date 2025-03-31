@@ -1,4 +1,6 @@
 
 # Go OCR
 
-- [ ] Implementar validación del dni para hacer retries 
+- [ ] Implementar Validators para los OCR
+- [ ] Crear un Worker que se encargue de procesar los archivos
+  - [ ] Implementar configuración del Worker (retries)
