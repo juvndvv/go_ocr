@@ -1,0 +1,14 @@
+{
+  "employee": {
+    "name": "(nombre completo)",
+    "tax_id": "(si comienza con A/B/C/D, validar como NIE (Ej: A1234567X); si es numérico + letra, validar como DNI (Ej: 12345678Z); si no, null)"
+  },
+  "date_range": {
+    "start_date": "yyyy-mm-dd",
+    "end_date": "yyyy-mm-dd"
+  },
+  "employer_costs": "(si no se encuentra explícito, calcular como: gross_amount + (gross_amount * [0.236 + (0.055 si 'indefinido' en el texto, 0.067 si 'temporal') + 0.002 + 0.006]))",
+  "gross_amount": "(valor numérico con .0)",
+  "deductions": "(valor numérico con .0)",
+  "net_amount": "(gross_amount - deductions)"
+}

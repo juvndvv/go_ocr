@@ -37,38 +37,20 @@ func ExtractPayrollData(text string) (*PayrollData, error) {
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 
 	// Construir el prompt completo
-	prompt := `Extract and transform payroll data into a JSON structure following these exact requirements:
-
-		1. JSON Structure (Mantain fields order and nesting):
-		   {
-			 "employee": {
-			   "name": "(nombre completo)",
-			   "tax_id": "(validar formato)"
-			 },
-			 "date_range": {
-			   "start_date": "yyyy-mm-dd",
-			   "end_date": "yyyy-mm-dd"
-			 },
-			 "employer_costs": (valor numérico),
-			 "gross_amount": (valor numérico),
-			 "deductions": (valor numérico),
-			 "net_amount": (valor numérico)
-		   }
-		
-		2. Reglas estrictas:
-		   - Tax ID Validation: Si el ID fiscal comienza con A,B,C,D, busca una cadena que se refiera a un DNI o NIE, si no la encuentras devuelve null
-		   - Employer Costs: Debe ser (gross_amount + deductions + company's contributions) si no se encuentra
-		   - Fechas: Formato ISO 8601 (ej: 2023-10-01)
-		   - Valores numéricos: Usar .0 decimal incluso para enteros
-		   - Campos faltantes: Usar null
-		
-		3. Validaciones finales:
-		   - employer_costs DEBE ser el valor más alto
-		   - net_amount DEBE ser (gross_amount - deductions)
-		   - Eliminar cualquier campo no especificado
-		   - Nunca agregar comentarios/explicaciones
-		
-		Procesar el texto proporcionado aplicando estas reglas estrictamente.` + "\n\n" + text
+	prompt := `{  
+  "employee": {  
+    "name": "(nombre completo)",  
+    "tax_id": "(si comienza con A/B/C/D, validar como NIE (Ej: A1234567X); si es numérico + letra, validar como DNI (Ej: 12345678Z); si no, null)"  
+  },  
+  "date_range": {  
+    "start_date": "yyyy-mm-dd",  
+    "end_date": "yyyy-mm-dd"  
+  },  
+  "employer_costs": "(si no se encuentra explícito, calcular como: gross_amount + (gross_amount * [0.236 + (0.055 si 'indefinido' en el texto, 0.067 si 'temporal') + 0.002 + 0.006]))",  
+  "gross_amount": "(valor numérico con .0)",  
+  "deductions": "(valor numérico con .0)",  
+  "net_amount": "(gross_amount - deductions)"  
+}  ` + "\n\n" + text
 
 	log.Info("Prompt: %s", prompt)
 
