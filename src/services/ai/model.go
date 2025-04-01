@@ -37,20 +37,52 @@ func ExtractPayrollData(text string) (*PayrollData, error) {
 	apiKey := os.Getenv("DEEPSEEK_API_KEY")
 
 	// Construir el prompt completo
-	prompt := `{  
+	prompt := `Eres un experto en nóminas españolas. Analiza el texto proporcionado y genera un JSON con esta estructura:  
+
+1. Employee:  
+   - name: Nombre completo del empleado (formato: "Nombre Apellido1 Apellido2").  
+   - tax_id:  
+     - Si empieza por A/B/C/D + 7 dígitos + letra válida → NIE (Ej: B1234567T).  
+     - Si son 8 dígitos + letra válida → DNI (Ej: 12345678Z).  
+     - Si es inválido → null.  
+
+2. Date_range:  
+   - start_date y end_date: Extraer de frases como "Periodo: 01/05/2024 - 31/05/2024". Formato: yyyy-mm-dd.  
+
+3. Employer_costs:  
+   - Si existe "Coste empresa" o similar → usar ese valor.  
+   - Si no → calcular: gross_amount + (gross_amount * [0.236 + (0.055 si 'indefinido' en el texto, 0.067 si 'temporal') + 0.002 + 0.006])).  
+
+4. Gross_amount: Buscar en "Total devengado" o "Bruto". Siempre en formato numérico (Ej: 2500.0).  
+
+5. Deductions: Sumar IRPF + cotizaciones del trabajador.  
+
+6. Net_amount: Debe ser igual a gross_amount - deductions. Validar con "Líquido a percibir".  
+
+Validaciones
+- Si el employer_costs que has obtenido es menor que el gross_amount el employeer_costs debe ser employeer_costs + gross_amount.
+
+Reglas estrictas:  
+- Campos obligatorios: name, gross_amount, net_amount.  
+- Si un dato no existe o es inválido → null (excepto en campos obligatorios).  
+- Solo se devuelve el JSON, sin comentarios.  
+
+Ejemplo de respuesta válida:  
+{  
   "employee": {  
-    "name": "(nombre completo)",  
-    "tax_id": "(si comienza con A/B/C/D, validar como NIE (Ej: A1234567X); si es numérico + letra, validar como DNI (Ej: 12345678Z); si no, null)"  
+    "name": "Ana Torres García",  
+    "tax_id": "X9876543L"  
   },  
   "date_range": {  
-    "start_date": "yyyy-mm-dd",  
-    "end_date": "yyyy-mm-dd"  
+    "start_date": "2024-06-01",  
+    "end_date": "2024-06-30"  
   },  
-  "employer_costs": "(si no se encuentra explícito, calcular como: gross_amount + (gross_amount * [0.236 + (0.055 si 'indefinido' en el texto, 0.067 si 'temporal') + 0.002 + 0.006]))",  
-  "gross_amount": "(valor numérico con .0)",  
-  "deductions": "(valor numérico con .0)",  
-  "net_amount": "(gross_amount - deductions)"  
-}  ` + "\n\n" + text
+  "employer_costs": 2945.7,  
+  "gross_amount": 2300.0,  
+  "deductions": 345.7,  
+  "net_amount": 1954.3  
+}  
+` + "\n\n" + text
 
 	log.Info("Prompt: %s", prompt)
 

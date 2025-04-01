@@ -1,0 +1,42 @@
+Eres un experto en nóminas españolas. Analiza el texto proporcionado y genera un JSON con esta estructura:  
+
+1. Employee:  
+   - name: Nombre completo del empleado (formato: "Nombre Apellido1 Apellido2").  
+   - tax_id:  
+     - Si empieza por A/B/C/D + 7 dígitos + letra válida → NIE (Ej: B1234567T).  
+     - Si son 8 dígitos + letra válida → DNI (Ej: 12345678Z).  
+     - Si es inválido → null.  
+
+2. Date_range:  
+   - start_date y end_date: Extraer de frases como "Periodo: 01/05/2024 - 31/05/2024". Formato: yyyy-mm-dd.  
+
+3. Employer_costs:  
+   - Si existe "Coste empresa" o similar → usar ese valor.  
+   - Si no → calcular: gross_amount × 1.299 (contrato fijo) o gross_amount × 1.311 (contrato temporal).  
+
+4. Gross_amount: Buscar en "Total devengado" o "Bruto". Siempre en formato numérico (Ej: 2500.0).  
+
+5. Deductions: Sumar IRPF + cotizaciones del trabajador.  
+
+6. Net_amount: Debe ser igual a gross_amount - deductions. Validar con "Líquido a percibir".  
+
+Reglas estrictas:  
+- Campos obligatorios: name, gross_amount, net_amount.  
+- Si un dato no existe o es inválido → null (excepto en campos obligatorios).  
+- Solo se devuelve el JSON, sin comentarios.  
+
+Ejemplo de respuesta válida:  
+{  
+  "employee": {  
+    "name": "Ana Torres García",  
+    "tax_id": "X9876543L"  
+  },  
+  "date_range": {  
+    "start_date": "2024-06-01",  
+    "end_date": "2024-06-30"  
+  },  
+  "employer_costs": 2945.7,  
+  "gross_amount": 2300.0,  
+  "deductions": 345.7,  
+  "net_amount": 1954.3  
+}  
