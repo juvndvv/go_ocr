@@ -10,6 +10,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+COPY ./config/air/.air.conf ./config/air/
 COPY . .
 
 # Etapa final

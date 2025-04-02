@@ -1,6 +1,4 @@
 
-
-
 .PHONY: start
 start:
 	@echo "Starting application"

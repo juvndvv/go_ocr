@@ -2,7 +2,7 @@ package ocr
 
 import (
 	"fmt"
-	"go_ocr/src/services/logger"
+	"go_ocr/internal/services/logger"
 	"os"
 	"os/exec"
 	"path/filepath"
