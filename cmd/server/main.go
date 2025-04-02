@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	uniPdfLicense "github.com/unidoc/unipdf/v3/common/license"
-	"go_ocr/src/services/ai"
-	"go_ocr/src/services/logger"
-	"go_ocr/src/services/pdf_extractor"
-	"go_ocr/src/services/pdf_extractor/downloader"
+	"go_ocr/internal/services/ai"
+	"go_ocr/internal/services/logger"
+	"go_ocr/internal/services/pdf_extractor"
+	"go_ocr/internal/services/pdf_extractor/downloader"
 	"net/http"
 	"os"
 	"time"
@@ -19,7 +19,7 @@ var (
 )
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("config/env/.env")
 	if err != nil {
 		log.Fatal("No se encontró archivo .env")
 	}
